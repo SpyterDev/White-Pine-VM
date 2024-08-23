@@ -11,4 +11,4 @@ everything is Subject-To-Change.
 White Pine is a project I am working on to learn how to make my own virtual machine (basically from scratch)
 and for fun. 
 
-- © Nicholas A. Fraidakis, 2024
+© Nicholas A. Fraidakis, 2024
