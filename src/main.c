@@ -68,9 +68,6 @@ struct {
 } decoded_flags;
 
 
-
-
-
 void * VirtualMemToReal(uint32_t address) {
     static struct {
         uint8_t * address; 
@@ -154,9 +151,31 @@ void white_pine_process(uint64_t * program_loc) {
     }
 }
 
-// Main code
-int main(void) {
+// White Pine loader
+
+void white_pine(int argc, char *argv[]) {
     printf("White Pine VM: %d.%d.%d\n", version_major, version_minor, version_micro);
-    white_pine_process(0);
+    if (argc == 1) goto noargs; 
+    uint64_t * exe_in_mem = NULL;
+    unsigned int length;
+    FILE * wp_exe_file = fopen(argv[1], "r");
+    if (wp_exe_file) {
+        fseek(wp_exe_file, 0, SEEK_END);
+        length = ftell(wp_exe_file);
+        fseek(wp_exe_file, 0, SEEK_SET);
+        exe_in_mem = (uint64_t *)malloc(length);
+        if (exe_in_mem) {
+            fread(exe_in_mem, 1, length, wp_exe_file);
+            white_pine_process(exe_in_mem);
+        } else printf("An Error Occurred Allocating Program Memory");
+        fclose(wp_exe_file);
+        return;
+    }
+noargs:
+    printf("Usage: white_pine [exe-path]");
+}
+// Main program entry point
+int main(int argc, char *argv[]) {
+    white_pine(argc, argv);
     return 0;
 }
