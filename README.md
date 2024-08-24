@@ -13,6 +13,6 @@ and for fun.
 
 ### Why is the Virtual Machine called "White Pine"?
 I prefer naming my projects after trees because I am not great at coming up with names. It also sounds pretty cool!
-¯\_(ツ)_/¯
+¯\\_(ツ)_/¯
 
 © Nicholas A. Fraidakis, 2024
