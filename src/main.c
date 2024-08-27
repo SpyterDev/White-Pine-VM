@@ -35,6 +35,7 @@
 // Important macros
 typedef uint8_t * arithmetic_void_ptr;
 #define allocated_memory 53248
+#define stack_size 524288
 #define less_than 1
 #define greater_than 2
 #define equal_to 4
@@ -59,6 +60,7 @@ typedef uint8_t * arithmetic_void_ptr;
 // Registers
 uint32_t r[num_of_registers];
 void * sp = 0;
+arithmetic_void_ptr * stack_mem_address = 0;
 uint64_t pc = 0;
 uint32_t psr = 0xffffffff;
 
@@ -78,9 +80,13 @@ void * VirtualMemToReal(uint32_t address) {
         uint8_t * address; 
         unsigned int offset;
     } page[allocated_memory / real_address_mask];
-    if (page[0].address == NULL) for (uint16_t i = 0; i < allocated_memory / real_address_mask; i+=1) page[i].address = malloc(real_address_mask), page[i].offset = (uint64_t)page[i].address & real_address_mask;
-    if ((address>>real_address_bits) > allocated_memory / real_address_mask) return page[0].address+page[0].offset;
-    return page[(address>>real_address_bits)].address + page[(address>>real_address_bits)].offset +(address&real_address_mask);
+    static _Bool page_init = 0;
+    if (!page_init) { for (uint32_t i = 0; i < allocated_memory / real_address_mask; i+=1) {page[i].address = 0;} page_init++; }
+    if ((stack_size >> real_address_bits) > address) return stack_mem_address + address;
+    if (page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address == NULL) page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address = malloc(real_address_mask), page[(address >> real_address_bits) - (stack_size >> real_address_bits)].offset = (uint64_t)page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address & real_address_mask;
+    if ((address>>real_address_bits) - (stack_size >> real_address_bits) > allocated_memory / real_address_mask) return VirtualMemToReal(0);
+    if (!page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address) return VirtualMemToReal(0);
+    return page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address + page[(address >> real_address_bits) - (stack_size >> real_address_bits)].offset + (address&real_address_mask);
 }
 
 // Fetch the next White Pine instruction
@@ -147,6 +153,9 @@ void execute(unsigned char opcode) {
 // White Pine process function
 
 void white_pine_process(uint64_t * program_loc) {
+    unsigned char stack_mem[stack_size];
+    sp = stack_mem;
+    stack_mem_address = stack_mem;
     pc = 0xffffffff;
     uint8_t opcode = decode(*program_loc);
     while (opcode) {
