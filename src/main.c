@@ -157,7 +157,7 @@ void white_pine_process(uint64_t * program_loc) {
 
 // White Pine loader
 
-void white_pine(int argc, char *argv[]) {
+void white_pine(int argc, char **argv) {
     printf("White Pine VM: %d.%d.%d\n", version_major, version_minor, version_micro);
     if (argc == 1) goto noargs; 
     uint64_t * exe_in_mem = NULL;
@@ -179,7 +179,7 @@ noargs:
     printf("Usage: white_pine [exe-path]");
 }
 // Main program entry point
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
     white_pine(argc, argv);
     return 0;
 }
