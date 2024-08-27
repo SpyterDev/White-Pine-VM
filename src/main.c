@@ -42,6 +42,8 @@ typedef uint8_t * arithmetic_void_ptr;
 #define all_cond 16
 #define real_address_mask 0xfff
 #define real_address_bits 12
+#define stack_mem_pages stack_size >> real_address_bits
+#define heap_mem_pages allocated_memory / real_address_bits
 #define num_of_registers 16
 #define condition_mask 0xF000000000000000 // Bits 63-61
 #define condition_shift 60
@@ -74,19 +76,23 @@ struct {
     uint8_t immM: 1; // Immediate Mode
 } decoded_flags;
 
-
+// Converts a Virtual Memory address into a *physical address
 void * VirtualMemToReal(uint32_t address) {
-    static struct {
-        uint8_t * address; 
-        unsigned int offset;
-    } page[allocated_memory / real_address_mask];
-    static _Bool page_init = 0;
-    if (!page_init) { for (uint32_t i = 0; i < allocated_memory / real_address_mask; i+=1) {page[i].address = 0;} page_init++; }
-    if ((stack_size >> real_address_bits) > address) return stack_mem_address + address;
-    if (page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address == NULL) page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address = malloc(real_address_mask), page[(address >> real_address_bits) - (stack_size >> real_address_bits)].offset = (uint64_t)page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address & real_address_mask;
-    if ((address>>real_address_bits) - (stack_size >> real_address_bits) > allocated_memory / real_address_mask) return VirtualMemToReal(0);
-    if (!page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address) return VirtualMemToReal(0);
-    return page[(address >> real_address_bits) - (stack_size >> real_address_bits)].address + page[(address >> real_address_bits) - (stack_size >> real_address_bits)].offset + (address&real_address_mask);
+    static uint8_t * heap_page[heap_mem_pages]; // Init static array to hold physical address of heap pages
+    static _Bool heap_pages_init = 0; // A variable to hold whether all the page address have been set to 0 (NULL), also this variable is set to false (0) by default
+    register uint32_t address_header = address >> real_address_bits; // Holds the page number of the inputed virtual address
+    register uint32_t address_header_shifted = address_header - stack_mem_pages; // Holds the page number of the inputed virtual address offset with the number of stack pages
+    if (!heap_pages_init) { 
+        for (uint32_t i = 0; i < heap_mem_pages; i+=1) heap_page[i] = 0;
+        heap_pages_init++; 
+    } // Inits all memory address in heap_page to 0 (NULL) at start as a placeholder value (only gets called once)
+    if (stack_mem_pages > address) return stack_mem_address + address; // Inputed address is on the stack and converted
+    if (!heap_page[address_header_shifted]) {
+        heap_page[address_header_shifted] = malloc(real_address_mask); // Allocates physical memory on the heap to be used
+        if (!heap_page[address_header_shifted]) return VirtualMemToReal(0); // Failed to allocate page on heap, returning base memory address of stack as a failsafe
+    } // Inits the page to a real physical address
+    if (address_header_shifted > heap_mem_pages) return VirtualMemToReal(0); // If the inputed address is greater than the amount of virtual memory, virtual address is treated like 0
+    return heap_page[address_header_shifted] + (address & real_address_mask); // Inputed address is on the heap and converted
 }
 
 // Fetch the next White Pine instruction
