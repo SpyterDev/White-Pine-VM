@@ -35,6 +35,10 @@
 // Important macros
 typedef uint8_t * arithmetic_void_ptr;
 #define allocated_memory 53248
+#define less_than 1
+#define greater_than 2
+#define equal_to 4
+#define all_cond 16
 #define real_address_mask 0xfff
 #define real_address_bits 12
 #define num_of_registers 16
@@ -51,11 +55,12 @@ typedef uint8_t * arithmetic_void_ptr;
 #define register_dest_mask 0x3C0000000000 // Bits 43-41
 #define register_dest_shift 42
 #define opperand_2_mask 0xffffffff // Bits 31-0
-#define pc r[15]
+
 // Registers
 uint32_t r[num_of_registers];
-
-void * sp;
+void * sp = 0;
+uint64_t pc = 0;
+uint32_t psr = 0xffffffff;
 
 // Instruction decoding variables
 struct {
@@ -95,6 +100,7 @@ unsigned char decode(uint64_t instruction) {
 
 // Execute a White Pine instruction
 void execute(unsigned char opcode) {
+    if (decoded_flags.cdn != all_cond && ((psr & 0xf) ^ decoded_flags.cdn != (~decoded_flags.cdn))) return;
     switch (opcode)
     {
     case mov:
@@ -132,8 +138,6 @@ void execute(unsigned char opcode) {
         break;
     case str:
         *(uint32_t *)VirtualMemToReal(decoded_flags.imm) = r[decoded_flags.rD];
-        break;
-    case rti:
         break;
     default:
         break;
