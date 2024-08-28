@@ -33,7 +33,7 @@ enum instr_set {
     mul, // Multipling
     divd, // Dividing
     lsl, lsr, // Bit shifting
-    rti, // Runtime interrupt
+    rnpi, // Runtime native api
     b, // Branch
     extend, // Extends a 8 or 16 bit number to a 32 bit number
     compress, // Compress a 32 bit number to a 8 or 16 bit number
