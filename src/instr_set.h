@@ -33,12 +33,14 @@ enum instr_set {
     mul, // Multipling
     divd, // Dividing
     lsl, lsr, // Bit shifting
-    rnpi, // Runtime native api
+    rnapi, // Runtime native api
     b, // Branch
+    bl, // Linked branch
+    ret, // Program counter is set to linked register (returns from a bl)
     extend, // Extends a 8 or 16 bit number to a 32 bit number
     compress, // Compress a 32 bit number to a 8 or 16 bit number
     _section, // A header to state whether the follow is an instruction or otherwise
     mov, // Moving values into or from the general-purpose registers
     cmp, // Compare RN with RM or immediate, output is in bits 0-3 in PSR (Program Status Register)
-    num_of_instrs
+    num_of_instructions
 };
