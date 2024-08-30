@@ -37,7 +37,8 @@ enum instr_set {
     b, // Branch
     extend, // Extends a 8 or 16 bit number to a 32 bit number
     compress, // Compress a 32 bit number to a 8 or 16 bit number
-    _section,
-    mov,
+    _section, // A header to state whether the follow is an instruction or otherwise
+    mov, // Moving values into or from the general-purpose registers
+    cmp, // Compare RN with RM, output is in bits 0-3 in PSR (Program Status Register)
     num_of_instrs
 };
