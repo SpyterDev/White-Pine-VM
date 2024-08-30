@@ -12,6 +12,7 @@ void rnapi_print(void) {
         current_mem += 1;
     }
 }
-
-const uint16_t number_of_rnapi_functions = 1;
-void (*runtime_native_api_functions[0xffff])(void) = {rnapi_print};
+struct {
+    const uint16_t num_of_funcs;
+    void (*func[0xffff])(void);
+} runtime_native_api_functions = {1, {rnapi_print}};
