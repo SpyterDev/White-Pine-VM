@@ -25,7 +25,7 @@
 #pragma once
 #include <stdint.h>
 
-extern void rnpi_print(void);
+extern void rnapi_print(void);
 extern struct {
     const uint16_t num_of_funcs;
     const void (*func[0xffff])(void);
