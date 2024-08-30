@@ -39,6 +39,6 @@ enum instr_set {
     compress, // Compress a 32 bit number to a 8 or 16 bit number
     _section, // A header to state whether the follow is an instruction or otherwise
     mov, // Moving values into or from the general-purpose registers
-    cmp, // Compare RN with RM, output is in bits 0-3 in PSR (Program Status Register)
+    cmp, // Compare RN with RM or immediate, output is in bits 0-3 in PSR (Program Status Register)
     num_of_instrs
 };
