@@ -113,7 +113,7 @@ unsigned char decode(uint64_t instruction) {
 
 // Execute a White Pine instruction
 void execute(unsigned char opcode) {
-    if (decoded_flags.cdn != all_cond && (((psr & 0xf) ^ decoded_flags.cdn) != (~decoded_flags.cdn))) return;
+    if (~psr & decoded_flags.cdn) return; // If condition is false, instruction is skipped
     switch (opcode)
     {
     case mov:
@@ -154,6 +154,13 @@ void execute(unsigned char opcode) {
         break;
     case rnpi:
         if (decoded_flags.rM < number_of_rnapi_functions) runtime_native_api_functions[decoded_flags.rM]();
+        break;
+    case cmp: 
+        psr = psr&(~0xf);
+        uint32_t compared_value = decoded_flags.immM ? decoded_flags.imm : r[decoded_flags.rM];
+        if (r[decoded_flags.rN] == compared_value) psr | equal_to;
+        else if (r[decoded_flags.rN] > compared_value) psr | less_than;
+        else if (r[decoded_flags.rN] < compared_value) psr | greater_than;
         break;
     default:
         break;
